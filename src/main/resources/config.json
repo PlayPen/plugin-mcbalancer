@@ -4,8 +4,8 @@
   "port-max": 25900,
   "servers": [
     {
-      "package": "blockwars",
-      "prefix": "BW",
+      "package": "sample",
+      "prefix": "sample",
       "ratio": 0.8,
       "min": 3,
       "max": 100
