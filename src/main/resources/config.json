@@ -1,0 +1,14 @@
+{
+  "scan-rate": 20,
+  "port-min": 25600,
+  "port-max": 25900,
+  "servers": [
+    {
+      "package": "blockwars",
+      "prefix": "BW",
+      "ratio": 0.8,
+      "min": 3,
+      "max": 100
+    }
+  ]
+}
