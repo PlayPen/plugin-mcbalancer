@@ -75,7 +75,7 @@ public class BalanceTask implements Runnable {
                     cn.setMaxPort(port);
                 }
 
-                int id = Integer.valueOf(server.getServer().getProperties().getOrDefault("port", "0"));
+                int id = Integer.valueOf(server.getServer().getProperties().getOrDefault("id", "0"));
                 if (cn.getMaxId() < id) {
                     for (int i = cn.getMaxId() + 1; i < id; ++i) {
                         cn.getAvailableIds().add(i);
@@ -166,7 +166,7 @@ public class BalanceTask implements Runnable {
             amt = target - servers.size();
 
             if(amt == 0) {
-                log.info("Package " + config.getPackageId() + " needs no balancing");
+                log.debug("Package " + config.getPackageId() + " needs no balancing");
                 continue;
             }
 
