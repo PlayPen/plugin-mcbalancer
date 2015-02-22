@@ -1,0 +1,5 @@
+{
+  "id": "mcbalancer",
+  "version": "1.0",
+  "main": "net.thechunk.playpen.plugin.mcbalancer.MCBalancerPlugin"
+}
