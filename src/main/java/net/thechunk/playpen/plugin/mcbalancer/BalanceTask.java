@@ -221,6 +221,7 @@ public class BalanceTask implements Runnable {
                     Map<String, String> props = new HashMap<>();
                     props.put("port", String.valueOf(port));
                     props.put("id", String.valueOf(id));
+                    props.put("managed_by", "mcbalancer");
 
                     String serverName = config.getPrefix() + id;
                     Network.get().provision(p3, serverName, props, coord.getUuid());
