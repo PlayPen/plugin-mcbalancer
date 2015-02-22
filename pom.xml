@@ -42,12 +42,17 @@
                     <artifactSet>
                         <includes>
                             <include>net.thechunk:craftywedge</include>
+                            <include>com.google.code.gson:gson</include>
                         </includes>
                     </artifactSet>
                     <relocations>
                         <relocation>
                             <pattern>net.thechunk.craftywedge</pattern>
                             <shadedPattern>net.thechunk.playpen.plugin.mcbalancer.internal.craftywedge</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.google.gson</pattern>
+                            <shadedPattern>net.thechunk.playpen.plugin.mcbalancer.internal.gson</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
