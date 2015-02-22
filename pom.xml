@@ -38,6 +38,19 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <artifactSet>
+                        <includes>
+                            <include>net.thechunk:craftywedge</include>
+                        </includes>
+                    </artifactSet>
+                    <relocations>
+                        <relocation>
+                            <pattern>net.thechunk.craftywedge</pattern>
+                            <shadedPattern>net.thechunk.playpen.plugin.mcbalancer.internal.craftywedge</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -54,6 +67,11 @@
             <artifactId>PlayPen</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.thechunk</groupId>
+            <artifactId>craftywedge</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
