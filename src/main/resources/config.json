@@ -1,5 +1,5 @@
 {
-  "scan-rate": 20,
+  "scan-rate": 60,
   "port-min": 25600,
   "port-max": 25900,
   "servers": [
