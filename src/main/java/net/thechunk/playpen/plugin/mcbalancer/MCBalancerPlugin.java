@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
@@ -29,6 +30,8 @@ public class MCBalancerPlugin extends AbstractPlugin {
 
     @Getter
     private Map<String, ServerConfig> configs = new ConcurrentHashMap<>();
+
+    private ScheduledFuture<?> task = null;
 
     public MCBalancerPlugin() {
         instance = this;
@@ -67,12 +70,14 @@ public class MCBalancerPlugin extends AbstractPlugin {
         log.info("Starting balancer with scan rate of " + scanRate);
         log.info("Initial balance will start in " + scanRate + " seconds");
 
-        Network.get().getScheduler().scheduleAtFixedRate(new BalanceTask(), scanRate, scanRate, TimeUnit.SECONDS);
+        task = Network.get().getScheduler().scheduleAtFixedRate(new BalanceTask(), scanRate, scanRate, TimeUnit.SECONDS);
 
         return true;
     }
 
     @Override
     public void onStop() {
+        if(!task.isDone() && !task.isCancelled())
+            task.cancel(false);
     }
 }
