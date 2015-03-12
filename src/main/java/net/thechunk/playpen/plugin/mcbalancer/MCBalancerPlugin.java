@@ -65,9 +65,9 @@ public class MCBalancerPlugin extends AbstractPlugin {
         }
 
         log.info("Starting balancer with scan rate of " + scanRate);
-        log.info("Initial balance will start in 10 seconds");
+        log.info("Initial balance will start in " + scanRate + " seconds");
 
-        Network.get().getScheduler().scheduleAtFixedRate(new BalanceTask(), 10L, scanRate, TimeUnit.SECONDS);
+        Network.get().getScheduler().scheduleAtFixedRate(new BalanceTask(), scanRate, scanRate, TimeUnit.SECONDS);
 
         return true;
     }
