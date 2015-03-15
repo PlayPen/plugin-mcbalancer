@@ -20,7 +20,8 @@ public class BalanceTask implements Runnable {
             log.debug("Balancing network");
 
             List<ServerInfo> infoList = new LinkedList<>();
-            Map<String, CoordinatorNumerics> numerics = new HashMap<>();
+            Map<String, CoordinatorNumerics> coordNumerics = new HashMap<>();
+            Map<String, PackageNumerics> p3Numerics = new HashMap<>();
 
             // build a list of managed servers
             for (LocalCoordinator coord : Network.get().getCoordinators().values()) {
@@ -75,20 +76,26 @@ public class BalanceTask implements Runnable {
                         cn.setMaxPort(port);
                     }
 
+                    PackageNumerics pn = p3Numerics.getOrDefault(server.getConfig().getPackageId(), null);
+                    if(pn == null) {
+                        pn = new PackageNumerics();
+                        p3Numerics.put(server.getConfig().getPackageId(), pn);
+                    }
+
                     int id = Integer.valueOf(server.getServer().getProperties().getOrDefault("id", "0"));
-                    if (cn.getMaxId() < id) {
-                        for (int i = cn.getMaxId() + 1; i < id; ++i) {
-                            cn.getAvailableIds().add(i);
+                    if (pn.getMaxId() < id) {
+                        for (int i = pn.getMaxId() + 1; i < id; ++i) {
+                            pn.getAvailableIds().add(i);
                         }
 
-                        cn.setMaxId(id);
+                        pn.setMaxId(id);
                     }
 
                     cn.getAvailablePorts().remove(port);
-                    cn.getAvailableIds().remove(id);
+                    pn.getAvailableIds().remove(id);
                 }
 
-                numerics.put(coord.getUuid(), cn);
+                coordNumerics.put(coord.getUuid(), cn);
             }
 
             final CountDownLatch latch = new CountDownLatch(infoList.size());
@@ -185,10 +192,18 @@ public class BalanceTask implements Runnable {
                             break; // trying again and again won't get a different result
                         }
 
-                        CoordinatorNumerics cn = numerics.get(coord.getUuid());
+                        CoordinatorNumerics cn = coordNumerics.get(coord.getUuid());
                         if (cn == null) {
                             log.error("Unable to find numerics instance for coordinator " + coord.getUuid());
                             break; // ditto
+                        }
+
+                        PackageNumerics pn = p3Numerics.get(p3.getId());
+                        if(pn == null) {
+                            // Coordinators are guaranteed to have numerics, but if this is the first time
+                            // we are provisioning a package, then we aren't guaranteed to have package numerics.
+                            pn = new PackageNumerics();
+                            p3Numerics.put(p3.getId(), pn);
                         }
 
                         // figure out what port and id to use
@@ -204,14 +219,14 @@ public class BalanceTask implements Runnable {
 
                         cn.getAvailablePorts().remove(port);
 
-                        if (cn.getAvailableIds().size() > 0) {
-                            id = cn.getAvailableIds().iterator().next();
+                        if (pn.getAvailableIds().size() > 0) {
+                            id = pn.getAvailableIds().iterator().next();
                         } else {
-                            id = cn.getMaxId() + 1;
-                            cn.setMaxId(id);
+                            id = pn.getMaxId() + 1;
+                            pn.setMaxId(id);
                         }
 
-                        cn.getAvailableIds().remove(id);
+                        pn.getAvailableIds().remove(id);
 
                         // build our server properties
                         Map<String, String> props = new HashMap<>();
@@ -244,8 +259,12 @@ public class BalanceTask implements Runnable {
     @Data
     private static class CoordinatorNumerics {
         private int maxPort = MCBalancerPlugin.getInstance().getMinPort() - 1;
-        private int maxId = 0;
         private Set<Integer> availablePorts = new HashSet<>();
+    }
+
+    @Data
+    private static class PackageNumerics {
+        private int maxId = 0;
         private Set<Integer> availableIds = new HashSet<>();
     }
 }
