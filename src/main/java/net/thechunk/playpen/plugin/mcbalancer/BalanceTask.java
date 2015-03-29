@@ -114,7 +114,7 @@ public class BalanceTask implements Runnable {
             while(it.hasNext()) {
                 ServerInfo info = it.next();
                 
-                if(info.getConfig().getAutoRestartTime() < 0)
+                if(info.getConfig().getAutoRestartTime() <= 0)
                     continue;
 
                 if(info.getStartupTime() + info.getConfig().getAutoRestartTime() > currentTime) {
