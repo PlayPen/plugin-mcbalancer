@@ -57,10 +57,19 @@ public class BalanceTask implements Runnable {
                         continue;
                     }
 
+                    long startupTime;
+                    try {
+                        startupTime = Long.valueOf(server.getProperties().get("startupTime"));
+                    } catch(NumberFormatException e) {
+                        log.warn("Server " + server.getName() + " has an invalid start time despite being managed", e);
+                        continue;
+                    }
+
                     ServerInfo info = new ServerInfo();
                     info.setServer(server);
                     info.setAddress(new InetSocketAddress(ip, port));
                     info.setConfig(MCBalancerPlugin.getInstance().getConfigs().get(server.getP3().getId()));
+                    info.setStartupTime(startupTime);
                     infoList.add(info);
                     servers.add(info);
                 }
@@ -98,6 +107,31 @@ public class BalanceTask implements Runnable {
                 coordNumerics.put(coord.getUuid(), cn);
             }
 
+            // deprovision any servers that are too old
+            long currentTime = System.currentTimeMillis() / 1000L;
+
+            Iterator<ServerInfo> it = infoList.iterator();
+            while(it.hasNext()) {
+                ServerInfo info = it.next();
+                
+                if(info.getConfig().getAutoRestartTime() < 0)
+                    continue;
+
+                if(info.getStartupTime() + info.getConfig().getAutoRestartTime() > currentTime) {
+                    // deprovision the server
+                    log.info("Server " + info.getServer().getName() + " has reached its lifetime, requesting deprovision");
+                    Network.get().deprovision(info.getServer().getCoordinator().getUuid(), info.getServer().getUuid());
+
+                    it.remove();
+                }
+            }
+
+            // IT'S THE FINAL COUNTDOWN
+            // DUH DUH DUH DUH
+            // DUH DUH DUH DUH DUH
+            // DUH DUH DUH DUH
+            // DUH DUH DUH DUH DUH DUH DUH
+            // https://www.youtube.com/watch?v=9jK-NcRmVcw
             final CountDownLatch latch = new CountDownLatch(infoList.size());
 
             // ping the servers
@@ -133,6 +167,8 @@ public class BalanceTask implements Runnable {
                 list.add(info);
             }
 
+            currentTime = System.currentTimeMillis() / 1000L;
+
             // balance the servers
             for (ServerConfig config : MCBalancerPlugin.getInstance().getConfigs().values()) {
                 List<ServerInfo> servers = packageMap.getOrDefault(config.getPackageId(), new LinkedList<>());
@@ -146,6 +182,9 @@ public class BalanceTask implements Runnable {
                 int totalMaxPlayers = 0;
                 double avgMaxPlayers = 0;
                 for (ServerInfo server : servers) {
+                    if(server.isError())
+                        continue;
+
                     totalPlayers += server.getPlayers();
                     totalMaxPlayers += server.getMaxPlayers();
                     avgMaxPlayers = server.getMaxPlayers();
@@ -233,6 +272,7 @@ public class BalanceTask implements Runnable {
                         props.put("port", String.valueOf(port));
                         props.put("id", String.valueOf(id));
                         props.put("managed_by", "mcbalancer");
+                        props.put("start_time", String.valueOf(currentTime));
 
                         String serverName = config.getPrefix() + id;
                         Network.get().provision(p3, serverName, props, coord.getUuid());

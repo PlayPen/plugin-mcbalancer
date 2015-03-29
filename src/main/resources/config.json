@@ -8,7 +8,11 @@
       "prefix": "sample",
       "ratio": 0.8,
       "min": 3,
-      "max": 100
+      "max": 100,
+
+      "_comment1": "This is in seconds. Ommit this setting if you don't want auto restarts",
+      "_comment2": "Note that auto restarts simply shut down the server after a period of time (they don't really restart)",
+      "auto-restart": 14400
     }
   ]
 }

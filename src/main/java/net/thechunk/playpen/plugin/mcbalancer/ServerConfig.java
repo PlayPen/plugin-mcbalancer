@@ -9,4 +9,5 @@ public class ServerConfig {
     private double targetRatio;
     private int minServers;
     private int maxServers;
+    private long autoRestartTime;
 }

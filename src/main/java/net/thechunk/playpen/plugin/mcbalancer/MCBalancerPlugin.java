@@ -6,6 +6,7 @@ import net.thechunk.playpen.coordinator.CoordinatorMode;
 import net.thechunk.playpen.coordinator.PlayPen;
 import net.thechunk.playpen.coordinator.network.Network;
 import net.thechunk.playpen.plugin.AbstractPlugin;
+import net.thechunk.playpen.utils.JSONUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -58,6 +59,10 @@ public class MCBalancerPlugin extends AbstractPlugin {
             config.setTargetRatio(obj.getDouble("ratio"));
             config.setMinServers(obj.getInt("min"));
             config.setMaxServers(obj.getInt("max"));
+            if(obj.has("auto-restart"))
+                config.setAutoRestartTime(obj.getLong("auto-restart"));
+            else
+                config.setAutoRestartTime(-1);
 
             if(configs.containsKey(config.getPackageId())) {
                 log.fatal("Cannot register multiple server types with the same package");

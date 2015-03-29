@@ -12,5 +12,6 @@ public class ServerInfo {
     private InetSocketAddress address;
     private int players;
     private int maxPlayers;
+    private long startupTime;
     private boolean error = false;
 }
