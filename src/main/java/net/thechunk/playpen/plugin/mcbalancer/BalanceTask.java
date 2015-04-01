@@ -217,6 +217,9 @@ public class BalanceTask implements Runnable {
                 log.info("Package " + config.getPackageId() + " needs balancing: ratio = " + ratio + ", ideal = " + idealRatio +
                         ", amt = " + amt);
 
+                Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Package " + config.getPackageId() +
+                    " needs balancing (amt = " + amt + ")");
+
                 if (amt > 0) {
                     P3Package p3 = Network.get().getPackageManager().resolve(config.getPackageId(), "promoted");
                     if (p3 == null) {
