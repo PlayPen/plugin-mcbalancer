@@ -8,6 +8,7 @@ import net.thechunk.playpen.coordinator.network.Network;
 import net.thechunk.playpen.coordinator.network.Server;
 import net.thechunk.playpen.p3.P3Package;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -28,7 +29,7 @@ public class BalanceTask implements Runnable {
                 if (!coord.isEnabled())
                     continue;
 
-                String ip = ((InetSocketAddress) coord.getChannel().remoteAddress()).getAddress().getHostAddress();
+                InetAddress ip = ((InetSocketAddress) coord.getChannel().remoteAddress()).getAddress();
 
                 List<ServerInfo> servers = new LinkedList<>();
 
@@ -51,7 +52,7 @@ public class BalanceTask implements Runnable {
 
                     int port;
                     try {
-                        port = Integer.valueOf(server.getProperties().get("port"));
+                        port = Integer.parseInt(server.getProperties().get("port"));
                     } catch (NumberFormatException e) {
                         log.warn("Server " + server.getName() + " has an invalid port despite being managed", e);
                         continue;
@@ -59,7 +60,7 @@ public class BalanceTask implements Runnable {
 
                     long startupTime;
                     try {
-                        startupTime = Long.valueOf(server.getProperties().get("startupTime"));
+                        startupTime = Long.parseLong(server.getProperties().get("startupTime"));
                     } catch(NumberFormatException e) {
                         log.warn("Server " + server.getName() + " has an invalid start time despite being managed", e);
                         continue;
