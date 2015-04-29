@@ -60,7 +60,7 @@ public class BalanceTask implements Runnable {
 
                     long startupTime;
                     try {
-                        startupTime = Long.parseLong(server.getProperties().get("startupTime"));
+                        startupTime = Long.parseLong(server.getProperties().get("start_time"));
                     } catch(NumberFormatException e) {
                         log.warn("Server " + server.getName() + " has an invalid start time despite being managed", e);
                         continue;
