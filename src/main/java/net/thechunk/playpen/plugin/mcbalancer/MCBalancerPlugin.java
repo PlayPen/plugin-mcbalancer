@@ -77,7 +77,7 @@ public class MCBalancerPlugin extends AbstractPlugin {
 
         task = Network.get().getScheduler().scheduleAtFixedRate(new BalanceTask(), scanRate, scanRate, TimeUnit.SECONDS);
 
-        return true;
+        return Network.get().getEventManager().registerListener(new NetworkListener());
     }
 
     @Override
