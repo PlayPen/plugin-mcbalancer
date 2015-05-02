@@ -1,5 +1,7 @@
 package net.thechunk.playpen.plugin.mcbalancer;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -169,20 +171,16 @@ public class Balancer {
             }
 
             // sort the servers by package
-            Map<String, List<ServerInfo>> packageMap = new HashMap<>();
+            Multimap<String, ServerInfo> packageMap = HashMultimap.create();
             for (ServerInfo info : infoList) {
-                if (!packageMap.containsKey(info.getServer().getP3().getId()))
-                    packageMap.put(info.getServer().getP3().getId(), new LinkedList<>());
-
-                List<ServerInfo> list = packageMap.get(info.getServer().getP3().getId());
-                list.add(info);
+                packageMap.put(info.getServer().getP3().getId(), info);
             }
 
             currentTime = System.currentTimeMillis() / 1000L;
 
             // balance the servers
             for (ServerConfig config : MCBalancerPlugin.getInstance().getConfigs().values()) {
-                List<ServerInfo> servers = packageMap.getOrDefault(config.getPackageId(), new LinkedList<>());
+                Collection<ServerInfo> servers = packageMap.get(config.getPackageId());
 
                 int amt = config.getMinServers();
                 double ratio = 0;
