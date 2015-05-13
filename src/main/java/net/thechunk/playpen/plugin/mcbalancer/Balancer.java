@@ -151,8 +151,9 @@ public class Balancer {
             // ping the servers
             ServerPinger pinger = new ServerPinger(Network.get().getEventLoopGroup());
             for (final ServerInfo info : infoList) {
-                info.setError(true);
+                info.setDnr(true);
                 pinger.ping(info.getAddress(), 500, (pingReply, error) -> {
+                    info.setDnr(false);
                     if (error != null) {
                         log.warn("Unable to ping server " + info.getServer().getName(), error);
                         info.setError(true);
@@ -170,6 +171,13 @@ public class Balancer {
                 if(!latch.await(10, TimeUnit.SECONDS))
                 {
                     log.warn("Some servers did not respond within 10 seconds");
+                    for(ServerInfo info : infoList) {
+                        if(info.isDnr()) {
+                            log.warn("Server " + info.getServer().getName() + " did not respond");
+                            Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " did not respond");
+                            info.setError(true);
+                        }
+                    }
                 }
             } catch (InterruptedException e) {
                 log.error("Interrupted while waiting for server ping responses", e);

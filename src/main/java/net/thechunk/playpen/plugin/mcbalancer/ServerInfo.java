@@ -14,4 +14,5 @@ public class ServerInfo {
     private int maxPlayers;
     private long startupTime;
     private boolean error = false;
+    private boolean dnr = false;
 }
