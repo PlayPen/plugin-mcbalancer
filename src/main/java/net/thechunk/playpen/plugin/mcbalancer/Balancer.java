@@ -1,7 +1,5 @@
 package net.thechunk.playpen.plugin.mcbalancer;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -15,6 +13,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Log4j2
@@ -24,8 +23,10 @@ public class Balancer {
     private static AtomicBoolean isBalancing = new AtomicBoolean(false);
 
     public static void balance() {
-        if(isBalancing.get())
+        if(isBalancing.get()) {
+            Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Balance already in progress");
             return;
+        }
 
         isBalancing.set(true);
 
@@ -150,6 +151,7 @@ public class Balancer {
             // ping the servers
             ServerPinger pinger = new ServerPinger(Network.get().getEventLoopGroup());
             for (final ServerInfo info : infoList) {
+                info.setError(true);
                 pinger.ping(info.getAddress(), 500, (pingReply, error) -> {
                     if (error != null) {
                         log.warn("Unable to ping server " + info.getServer().getName(), error);
@@ -157,6 +159,7 @@ public class Balancer {
                     } else {
                         info.setPlayers(pingReply.getPlayers().getOnline());
                         info.setMaxPlayers(pingReply.getPlayers().getMax());
+                        info.setError(false);
                     }
 
                     latch.countDown();
@@ -164,23 +167,30 @@ public class Balancer {
             }
 
             try {
-                latch.await();
+                if(!latch.await(10, TimeUnit.SECONDS))
+                {
+                    log.warn("Some servers did not respond within 10 seconds");
+                }
             } catch (InterruptedException e) {
                 log.error("Interrupted while waiting for server ping responses", e);
                 return;
             }
 
             // sort the servers by package
-            Multimap<String, ServerInfo> packageMap = HashMultimap.create();
+            Map<String, List<ServerInfo>> packageMap = new HashMap<>();
             for (ServerInfo info : infoList) {
-                packageMap.put(info.getServer().getP3().getId(), info);
+                if (!packageMap.containsKey(info.getServer().getP3().getId()))
+                    packageMap.put(info.getServer().getP3().getId(), new LinkedList<>());
+
+                List<ServerInfo> list = packageMap.get(info.getServer().getP3().getId());
+                list.add(info);
             }
 
             currentTime = System.currentTimeMillis() / 1000L;
 
             // balance the servers
             for (ServerConfig config : MCBalancerPlugin.getInstance().getConfigs().values()) {
-                Collection<ServerInfo> servers = packageMap.get(config.getPackageId());
+                List<ServerInfo> servers = packageMap.getOrDefault(config.getPackageId(), new LinkedList<>());
 
                 int amt = config.getMinServers();
                 double ratio = 0;
@@ -190,19 +200,25 @@ public class Balancer {
                 int totalPlayers = 0;
                 int totalMaxPlayers = 0;
                 double avgMaxPlayers = 0;
+                int serverCount = 0;
                 for (ServerInfo server : servers) {
                     if(server.isError())
                         continue;
 
+                    if(server.getMaxPlayers() == 0)
+                        continue;
+
                     totalPlayers += server.getPlayers();
                     totalMaxPlayers += server.getMaxPlayers();
-                    avgMaxPlayers = server.getMaxPlayers();
+
+                    avgMaxPlayers += server.getMaxPlayers();
+                    ++serverCount;
                 }
 
-                if (servers.size() != 0 && totalMaxPlayers != 0) {
+                if (serverCount != 0 && totalMaxPlayers != 0) {
                     // we need an average of max players per server since we may have servers with different max player counts
                     // due to running different versions of the same package.
-                    avgMaxPlayers /= servers.size();
+                    avgMaxPlayers /= serverCount;
 
                     ratio = ((double) totalPlayers) / ((double) totalMaxPlayers);
 
