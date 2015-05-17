@@ -312,16 +312,10 @@ public class Balancer {
                         Network.get().provision(p3, serverName, props, coord.getUuid());
                     }
                 } else {
-                    int i = -amt;
-                    for (ServerInfo info : servers) {
-                        if (i == 0)
-                            break;
-
-                        if (info.getPlayers() == 0) {
-                            i--;
-                            Network.get().deprovision(info.getServer().getCoordinator().getUuid(), info.getServer().getUuid());
-                        }
-                    }
+                    servers.stream()
+                            .filter(info -> info.getPlayers() == 0)
+                            .limit(amt)
+                            .forEach(info -> Network.get().deprovision(info.getServer().getCoordinator().getUuid(), info.getServer().getUuid()));
                 }
             }
         }
