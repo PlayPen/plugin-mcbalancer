@@ -22,6 +22,8 @@ public class Balancer {
     @Getter
     private static AtomicBoolean isBalancing = new AtomicBoolean(false);
 
+    private static Map<String, Integer> notResponding = new HashMap<>();
+
     public static void balance() {
         if(!isBalancing.compareAndSet(false, true)) {
             Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Balance already in progress");
@@ -129,7 +131,7 @@ public class Balancer {
                 if(info.getConfig().getAutoRestartTime() <= 0)
                     continue;
 
-                if(info.getStartupTime() + info.getConfig().getAutoRestartTime() > currentTime) {
+                if(currentTime - info.getStartupTime() > info.getConfig().getAutoRestartTime()) {
                     // deprovision the server
                     log.info("Server " + info.getServer().getName() + " has reached its lifetime, requesting deprovision");
 
@@ -173,14 +175,48 @@ public class Balancer {
                     for(ServerInfo info : infoList) {
                         if(info.isDnr()) {
                             log.warn("Server " + info.getServer().getName() + " did not respond");
-                            Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " did not respond");
                             info.setError(true);
+
+                            if(notResponding.containsKey(info.getServer().getUuid())) {
+                                Integer count = notResponding.get(info.getServer().getUuid());
+                                count++;
+                                notResponding.put(info.getServer().getUuid(), count);
+                                if(count >= MCBalancerPlugin.getInstance().getDnrAttempts()) {
+                                    log.warn("Server " + info.getServer().getName() + " has hit max DNR attempts, deprovisioning.");
+                                    Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " hit max DNR attempts. Forcing deprovision.");
+                                    Network.get().deprovision(info.getServer().getCoordinator().getUuid(), info.getServer().getUuid(), true);
+                                }
+                                else
+                                {
+                                    Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " did not respond");
+                                }
+                            }
+                            else
+                            {
+                                notResponding.put(info.getServer().getUuid(), 1);
+                                Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " did not respond");
+                            }
                         }
                     }
                 }
             } catch (InterruptedException e) {
                 log.error("Interrupted while waiting for server ping responses", e);
                 return;
+            }
+
+            Iterator<Map.Entry<String, Integer>> dnrIt = notResponding.entrySet().iterator();
+            while(dnrIt.hasNext()) {
+                Map.Entry<String, Integer> entry = dnrIt.next();
+                boolean found = false;
+                for(LocalCoordinator lc : Network.get().getCoordinators().values()) {
+                    if(lc.getServer(entry.getKey()) != null) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if(!found)
+                    dnrIt.remove();
             }
 
             // sort the servers by package

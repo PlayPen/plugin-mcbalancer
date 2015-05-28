@@ -2,6 +2,7 @@
   "scan-rate": 60,
   "port-min": 25600,
   "port-max": 25900,
+  "dnr-attempts": 3,
   "servers": [
     {
       "package": "sample",

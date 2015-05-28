@@ -30,6 +30,9 @@ public class MCBalancerPlugin extends AbstractPlugin {
     private int maxPort;
 
     @Getter
+    private int dnrAttempts;
+
+    @Getter
     private Map<String, ServerConfig> configs = new ConcurrentHashMap<>();
 
     private ScheduledFuture<?> task = null;
@@ -49,6 +52,7 @@ public class MCBalancerPlugin extends AbstractPlugin {
         scanRate = getConfig().getLong("scan-rate");
         minPort = getConfig().getInt("port-min");
         maxPort = getConfig().getInt("port-max");
+        dnrAttempts = getConfig().getInt("dnr-attempts");
 
         JSONArray servers = getConfig().getJSONArray("servers");
         for(int i = 0; i < servers.length(); ++i) {
