@@ -134,8 +134,9 @@ public class Balancer {
                 if(info.getStartupTime() + info.getConfig().getAutoRestartTime() > currentTime) {
                     // deprovision the server
                     log.info("Server " + info.getServer().getName() + " has reached its lifetime, requesting deprovision");
-                    Network.get().deprovision(info.getServer().getCoordinator().getUuid(), info.getServer().getUuid());
 
+                    Network.get().deprovision(info.getServer().getCoordinator().getUuid(), info.getServer().getUuid());
+                    Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " has reached its lifetime");
                     it.remove();
                 }
             }
