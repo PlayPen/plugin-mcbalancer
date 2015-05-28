@@ -23,12 +23,10 @@ public class Balancer {
     private static AtomicBoolean isBalancing = new AtomicBoolean(false);
 
     public static void balance() {
-        if(isBalancing.get()) {
+        if(!isBalancing.compareAndSet(false, true)) {
             Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Balance already in progress");
             return;
         }
-
-        isBalancing.set(true);
 
         try {
             log.debug("Balancing network");
