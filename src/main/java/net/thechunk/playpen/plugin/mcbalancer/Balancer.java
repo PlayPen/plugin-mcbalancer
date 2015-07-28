@@ -171,8 +171,9 @@ public class Balancer {
                     log.warn("Some servers did not respond within 10 seconds");
                     for(ServerInfo info : infoList) {
                         if(info.isDnr()) {
-                            log.warn("Server " + info.getServer().getName() + " did not respond");
-                            Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " did not respond");
+                            log.warn("Server " + info.getServer().getName() + " (" + info.getAddress() + ") did not respond");
+                            Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() +
+                                    " (" + info.getAddress() + ") did not respond");
                             info.setError(true);
                         }
                     }
