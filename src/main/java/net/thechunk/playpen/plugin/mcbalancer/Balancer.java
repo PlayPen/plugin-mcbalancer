@@ -174,7 +174,8 @@ public class Balancer {
                     log.warn("Some servers did not respond within 10 seconds");
                     for(ServerInfo info : infoList) {
                         if(info.isDnr()) {
-                            log.warn("Server " + info.getServer().getName() + " did not respond");
+                            log.warn("Server " + info.getServer().getName() + " (" + info.getServer().getUuid() + " on " +
+                                            info.getServer().getCoordinator().getName() + ") did not respond");
                             info.setError(true);
 
                             if(notResponding.containsKey(info.getServer().getUuid())) {
@@ -188,13 +189,15 @@ public class Balancer {
                                 }
                                 else
                                 {
-                                    Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " did not respond");
+                                    Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() +
+                                            " (" + info.getServer().getUuid() + " on " + info.getServer().getCoordinator().getName() + ") did not respond");
                                 }
                             }
                             else
                             {
                                 notResponding.put(info.getServer().getUuid(), 1);
-                                Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " did not respond");
+                                Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() +
+                                        " (" + info.getServer().getUuid() + " on " + info.getServer().getCoordinator().getName() + ") did not respond");
                             }
                         }
                     }
@@ -351,7 +354,7 @@ public class Balancer {
                 } else {
                     servers.stream()
                             .filter(info -> info.getPlayers() == 0)
-                            .limit(amt)
+                            .limit(-amt)
                             .forEach(info -> Network.get().deprovision(info.getServer().getCoordinator().getUuid(), info.getServer().getUuid()));
                 }
             }
