@@ -3,6 +3,7 @@
   "port-min": 25600,
   "port-max": 25900,
   "dnr-attempts": 3,
+  "lifetime-deprovision-limit": 2,
   "servers": [
     {
       "package": "sample",

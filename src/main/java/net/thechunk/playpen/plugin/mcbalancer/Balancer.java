@@ -125,7 +125,14 @@ public class Balancer {
             long currentTime = System.currentTimeMillis() / 1000L;
 
             Iterator<ServerInfo> it = infoList.iterator();
+            int lifespanDeprovisions = 0;
             while(it.hasNext()) {
+                if (lifespanDeprovisions >= MCBalancerPlugin.getInstance().getLifespanDeprovisionLimit()) {
+                    log.info("Deferring lifespan deprovisions to a later time as the limit per balance was hit");
+                    Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Deferring lifespan deprovisions to a later time as the limit per balance was hit");
+                    break;
+                }
+
                 ServerInfo info = it.next();
 
                 if(info.getConfig().getAutoRestartTime() <= 0)
@@ -138,6 +145,8 @@ public class Balancer {
                     Network.get().deprovision(info.getServer().getCoordinator().getUuid(), info.getServer().getUuid());
                     Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " has reached its lifetime");
                     it.remove();
+
+                    ++lifespanDeprovisions;
                 }
             }
 
