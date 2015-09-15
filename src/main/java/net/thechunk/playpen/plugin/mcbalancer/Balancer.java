@@ -167,6 +167,7 @@ public class Balancer {
                     if (error != null) {
                         log.warn("Unable to ping server " + info.getServer().getName(), error);
                         info.setError(true);
+                        info.setDnr(true);
                     } else {
                         info.setPlayers(pingReply.getPlayers().getOnline());
                         info.setMaxPlayers(pingReply.getPlayers().getMax());
