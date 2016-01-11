@@ -1,7 +1,7 @@
-package net.thechunk.playpen.plugin.mcbalancer;
+package io.playpen.plugin.mcbalancer;
 
+import io.playpen.core.coordinator.network.Server;
 import lombok.Data;
-import net.thechunk.playpen.coordinator.network.Server;
 
 import java.net.InetSocketAddress;
 

@@ -24,7 +24,7 @@
  *
  * For more information, please refer to <http://unlicense.org/>
  */
-package net.thechunk.playpen.plugin.mcbalancer;
+package io.playpen.plugin.mcbalancer;
 
 import com.google.gson.Gson;
 import lombok.Data;

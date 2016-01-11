@@ -14,6 +14,7 @@
 
       "_comment1": "This is in seconds. Ommit this setting if you don't want auto restarts",
       "_comment2": "Note that auto restarts simply shut down the server after a period of time (they don't really restart)",
+      "_comment3": "The plugin will then try to create a new server to replace it",
       "auto-restart": 14400
     }
   ]

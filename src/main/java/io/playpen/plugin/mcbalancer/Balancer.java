@@ -1,17 +1,20 @@
-package net.thechunk.playpen.plugin.mcbalancer;
+package io.playpen.plugin.mcbalancer;
 
+import io.playpen.core.coordinator.network.LocalCoordinator;
+import io.playpen.core.coordinator.network.Network;
+import io.playpen.core.coordinator.network.Server;
+import io.playpen.core.p3.P3Package;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import net.thechunk.playpen.coordinator.network.LocalCoordinator;
-import net.thechunk.playpen.coordinator.network.Network;
-import net.thechunk.playpen.coordinator.network.Server;
-import net.thechunk.playpen.p3.P3Package;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Log4j2

@@ -1,12 +1,12 @@
-package net.thechunk.playpen.plugin.mcbalancer;
+package io.playpen.plugin.mcbalancer;
 
+import io.playpen.core.coordinator.network.INetworkListener;
+import io.playpen.core.coordinator.network.LocalCoordinator;
+import io.playpen.core.coordinator.network.Network;
+import io.playpen.core.coordinator.network.Server;
+import io.playpen.core.plugin.EventManager;
+import io.playpen.core.plugin.IPlugin;
 import lombok.extern.log4j.Log4j2;
-import net.thechunk.playpen.coordinator.network.INetworkListener;
-import net.thechunk.playpen.coordinator.network.LocalCoordinator;
-import net.thechunk.playpen.coordinator.network.Network;
-import net.thechunk.playpen.coordinator.network.Server;
-import net.thechunk.playpen.plugin.EventManager;
-import net.thechunk.playpen.plugin.IPlugin;
 
 @Log4j2
 public class NetworkListener implements INetworkListener {

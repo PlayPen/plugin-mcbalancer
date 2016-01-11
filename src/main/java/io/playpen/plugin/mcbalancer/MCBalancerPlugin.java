@@ -1,12 +1,11 @@
-package net.thechunk.playpen.plugin.mcbalancer;
+package io.playpen.plugin.mcbalancer;
 
+import io.playpen.core.coordinator.CoordinatorMode;
+import io.playpen.core.coordinator.PlayPen;
+import io.playpen.core.coordinator.network.Network;
+import io.playpen.core.plugin.AbstractPlugin;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import net.thechunk.playpen.coordinator.CoordinatorMode;
-import net.thechunk.playpen.coordinator.PlayPen;
-import net.thechunk.playpen.coordinator.network.Network;
-import net.thechunk.playpen.plugin.AbstractPlugin;
-import net.thechunk.playpen.utils.JSONUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

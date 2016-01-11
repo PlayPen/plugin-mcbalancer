@@ -1,4 +1,4 @@
-package net.thechunk.playpen.plugin.mcbalancer;
+package io.playpen.plugin.mcbalancer;
 
 import lombok.Data;
 
