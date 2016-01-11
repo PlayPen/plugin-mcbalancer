@@ -3,7 +3,6 @@ package net.thechunk.playpen.plugin.mcbalancer;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import net.thechunk.craftywedge.ServerPinger;
 import net.thechunk.playpen.coordinator.network.LocalCoordinator;
 import net.thechunk.playpen.coordinator.network.Network;
 import net.thechunk.playpen.coordinator.network.Server;
@@ -12,8 +11,7 @@ import net.thechunk.playpen.p3.P3Package;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Log4j2
@@ -23,6 +21,8 @@ public class Balancer {
     private static AtomicBoolean isBalancing = new AtomicBoolean(false);
 
     private static Map<String, Integer> notResponding = new HashMap<>();
+
+    private static ExecutorService executor = Executors.newFixedThreadPool(8);
 
     public static void balance() {
         if(!isBalancing.compareAndSet(false, true)) {
@@ -156,25 +156,30 @@ public class Balancer {
             // DUH DUH DUH DUH
             // DUH DUH DUH DUH DUH DUH DUH
             // https://www.youtube.com/watch?v=9jK-NcRmVcw
+            // TODO: Maybe we should wait on futures instead?
             final CountDownLatch latch = new CountDownLatch(infoList.size());
 
             // ping the servers
-            ServerPinger pinger = new ServerPinger(Network.get().getEventLoopGroup());
             for (final ServerInfo info : infoList) {
                 info.setDnr(true);
-                pinger.ping(info.getAddress(), 500, (pingReply, error) -> {
-                    info.setDnr(false);
-                    if (error != null) {
-                        log.warn("Unable to ping server " + info.getServer().getName(), error);
-                        info.setError(true);
-                        info.setDnr(true);
-                    } else {
+                executor.execute(() -> {
+                    ServerListPing ping = new ServerListPing();
+                    ping.setTimeout(500);
+                    ping.setHost(info.getAddress());
+                    try {
+                        ServerListPing.StatusResponse pingReply = ping.fetchData();
+                        if (pingReply == null) throw new Exception("No response received");
+                        info.setDnr(false);
                         info.setPlayers(pingReply.getPlayers().getOnline());
                         info.setMaxPlayers(pingReply.getPlayers().getMax());
                         info.setError(false);
+                    } catch (Exception e) {
+                        log.warn("Unable to ping server " + info.getServer().getName(), e);
+                        info.setError(true);
+                        info.setDnr(true);
+                    } finally {
+                        latch.countDown();
                     }
-
-                    latch.countDown();
                 });
             }
 
