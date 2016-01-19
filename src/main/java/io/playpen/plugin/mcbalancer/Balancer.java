@@ -201,8 +201,9 @@ public class Balancer {
                                 count++;
                                 notResponding.put(info.getServer().getUuid(), count);
                                 if(count >= MCBalancerPlugin.getInstance().getDnrAttempts()) {
-                                    log.warn("Server " + info.getServer().getName() + " has hit max DNR attempts, deprovisioning.");
-                                    Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " hit max DNR attempts. Forcing deprovision.");
+                                    log.warn("Server " + info.getServer().getName() + " has hit max DNR attempts, freezing + deprovisioning.");
+                                    Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Server " + info.getServer().getName() + " hit max DNR attempts. Freezing + force-deprovision.");
+                                    Network.get().freezeServer(info.getServer().getCoordinator().getUuid(), info.getServer().getUuid());
                                     Network.get().deprovision(info.getServer().getCoordinator().getUuid(), info.getServer().getUuid(), true);
                                 }
                                 else
