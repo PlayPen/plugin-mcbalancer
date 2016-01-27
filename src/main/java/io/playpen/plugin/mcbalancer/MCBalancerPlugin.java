@@ -35,6 +35,9 @@ public class MCBalancerPlugin extends AbstractPlugin {
     private int lifespanDeprovisionLimit;
 
     @Getter
+    private int provisionLimit;
+
+    @Getter
     private Map<String, ServerConfig> configs = new ConcurrentHashMap<>();
 
     private ScheduledFuture<?> task = null;
@@ -56,6 +59,7 @@ public class MCBalancerPlugin extends AbstractPlugin {
         maxPort = getConfig().getInt("port-max");
         dnrAttempts = getConfig().getInt("dnr-attempts");
         lifespanDeprovisionLimit = getConfig().getInt("lifetime-deprovision-limit");
+        provisionLimit = getConfig().getInt("provision-limit");
 
         JSONArray servers = getConfig().getJSONArray("servers");
         for(int i = 0; i < servers.length(); ++i) {

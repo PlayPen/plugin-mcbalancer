@@ -4,6 +4,7 @@
   "port-max": 25900,
   "dnr-attempts": 3,
   "lifetime-deprovision-limit": 2,
+  "provision-limit": 10,
   "servers": [
     {
       "package": "sample",

@@ -253,6 +253,8 @@ public class Balancer {
 
             currentTime = System.currentTimeMillis() / 1000L;
 
+            int provisionCount = 0;
+
             // balance the servers
             for (ServerConfig config : MCBalancerPlugin.getInstance().getConfigs().values()) {
                 List<ServerInfo> servers = packageMap.getOrDefault(config.getPackageId(), new LinkedList<>());
@@ -317,7 +319,7 @@ public class Balancer {
                         continue;
                     }
 
-                    for (int i = 0; i < amt; ++i) {
+                    for (int i = 0; i < amt && provisionCount <= MCBalancerPlugin.getInstance().getProvisionLimit(); ++i) {
                         LocalCoordinator coord = Network.get().selectCoordinator(p3);
                         if (coord == null) {
                             log.error("Unable to select a coordinator for balancing");
@@ -369,6 +371,13 @@ public class Balancer {
 
                         String serverName = config.getPrefix() + id;
                         Network.get().provision(p3, serverName, props, coord.getUuid());
+                        provisionCount++;
+                    }
+
+                    if (provisionCount >= MCBalancerPlugin.getInstance().getProvisionLimit()) {
+                        log.info("Deferring further provisions to a later time as the limit per balance was hit");
+                        Network.get().pluginMessage(MCBalancerPlugin.getInstance(), "log", "Deferring further provisions to a later time as the limit per balance was hit");
+                        break;
                     }
                 } else {
                     servers.stream()
