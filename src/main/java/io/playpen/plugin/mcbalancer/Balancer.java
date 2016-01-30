@@ -162,6 +162,8 @@ public class Balancer {
             // TODO: Maybe we should wait on futures instead?
             final CountDownLatch latch = new CountDownLatch(infoList.size());
 
+            log.debug("Starting ping tasks for " + infoList.size() + " servers");
+
             // ping the servers
             for (final ServerInfo info : infoList) {
                 info.setDnr(true);
@@ -251,6 +253,8 @@ public class Balancer {
                 list.add(info);
             }
 
+            log.debug("Package map has " + packageMap.size() + " entries");
+
             currentTime = System.currentTimeMillis() / 1000L;
 
             int provisionCount = 0;
@@ -268,12 +272,15 @@ public class Balancer {
                 int totalMaxPlayers = 0;
                 double avgMaxPlayers = 0;
                 int serverCount = 0;
+                log.debug(servers.size() + " servers for " + config.getPackageId());
                 for (ServerInfo server : servers) {
                     if(server.isError())
                         continue;
 
-                    if(server.getMaxPlayers() == 0)
+                    if(server.getMaxPlayers() == 0) {
+                        log.warn("Max players is 0 for " + server.getServer().getName());
                         continue;
+                    }
 
                     totalPlayers += server.getPlayers();
                     totalMaxPlayers += server.getMaxPlayers();
@@ -281,6 +288,11 @@ public class Balancer {
                     avgMaxPlayers += server.getMaxPlayers();
                     ++serverCount;
                 }
+
+                log.debug("totalPlayers = " + totalPlayers);
+                log.debug("totalMaxPlayers = " + totalMaxPlayers);
+                log.debug("avgMaxPlayers = " + avgMaxPlayers);
+                log.debug("serverCount = " + serverCount);
 
                 if (serverCount != 0 && totalMaxPlayers != 0) {
                     // we need an average of max players per server since we may have servers with different max player counts
@@ -300,6 +312,8 @@ public class Balancer {
 
                 int target = Math.max(config.getMinServers(), Math.min(config.getMaxServers(), servers.size() + amt));
                 amt = target - servers.size();
+
+                log.debug("Target for " + config.getPackageId() + " is " + target + ", need " + amt + " for " + servers.size() + " servers.");
 
                 if (amt == 0) {
                     log.debug("Package " + config.getPackageId() + " needs no balancing");
