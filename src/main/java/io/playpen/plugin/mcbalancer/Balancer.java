@@ -174,6 +174,8 @@ public class Balancer {
                     try {
                         ServerListPing.StatusResponse pingReply = ping.fetchData();
                         if (pingReply == null) throw new Exception("No response received");
+                        log.debug("Server " + info.getServer().getName() + " has " + pingReply.getPlayers().getOnline()
+                                + "/" + pingReply.getPlayers().getMax() + " players");
                         info.setDnr(false);
                         info.setPlayers(pingReply.getPlayers().getOnline());
                         info.setMaxPlayers(pingReply.getPlayers().getMax());
