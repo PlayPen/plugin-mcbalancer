@@ -169,7 +169,7 @@ public class Balancer {
                 info.setDnr(true);
                 executor.execute(() -> {
                     ServerListPing ping = new ServerListPing();
-                    ping.setTimeout(500);
+                    ping.setTimeout(10000);
                     ping.setHost(info.getAddress());
                     try {
                         ServerListPing.StatusResponse pingReply = ping.fetchData();
